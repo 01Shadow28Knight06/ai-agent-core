@@ -1,5 +1,3 @@
-TELEGRAM_BOT_TOKEN = os.getenv("TELEGRAM_BOT_TOKEN", "9064545567:AAGg0FXDYlbxwG3Y5a6zCaflvzvEquUv2rQ")
-TELEGRAM_CHAT_ID = os.getenv("TELEGRAM_CHAT_ID", "7256706573")
 import os
 from fastapi import FastAPI, Depends, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
@@ -12,7 +10,8 @@ import httpx
 
 import models
 from database import engine, get_db
-
+TELEGRAM_BOT_TOKEN = os.getenv("TELEGRAM_BOT_TOKEN", "9064545567:AAGg0FXDYlbxwG3Y5a6zCaflvzvEquUv2rQ")
+TELEGRAM_CHAT_ID = os.getenv("TELEGRAM_CHAT_ID", "7256706573")
 load_dotenv()
 
 # Creamos las tablas en SQLite automáticamente si no existen
