@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Clínica Estética Poniente - Asistente IA</title>
+    <style>
+        body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; background: #0f172a; color: #f8fafc; display: flex; justify-content: center; align-items: center; height: 100vh; margin: 0; }
+        .card { background: #1e293b; padding: 2rem; border-radius: 12px; box-shadow: 0 10px 25px rgba(0,0,0,0.3); width: 100%; max-width: 400px; }
+        h2 { margin-top: 0; color: #38bdf8; font-size: 1.25rem; }
+        label { display: block; margin-bottom: 0.5rem; font-size: 0.875rem; color: #94a3b8; }
+        input, textarea { width: 100%; padding: 0.75rem; margin-bottom: 1rem; background: #0f172a; border: 1px solid #334155; border-radius: 6px; color: #fff; box-sizing: border-box; }
+        button { background: #0ea5e9; color: white; border: none; padding: 0.75rem; width: 100%; border-radius: 6px; font-weight: bold; cursor: pointer; transition: background 0.2s; }
+        button:hover { background: #0284c7; }
+        #response-box { margin-top: 1rem; padding: 0.75rem; background: #0f172a; border-left: 4px solid #38bdf8; border-radius: 4px; font-size: 0.875rem; display: none; }
+    </style>
+</head>
+<body>
+
+<div class="card">
+    <h2>Consulta Inteligente (Demo)</h2>
+    <form id="lead-form">
+        <label for="nombre">Tu Nombre:</label>
+        <input type="text" id="nombre" required placeholder="Ej. Valeria Garza">
+
+        <label for="mensaje">¿Qué servicio te interesa o qué duda tienes?</label>
+        <textarea id="mensaje" rows="3" required placeholder="Ej. ¿Cuánto cuesta el tratamiento y tienen espacio el viernes?"></textarea>
+
+        <button type="submit" id="btn-submit">Enviar Consulta</button>
+    </form>
+
+    <div id="response-box">
+        <strong>Respuesta del Asistente:</strong>
+        <p id="ai-text" style="margin: 0.5rem 0 0 0; color: #cbd5e1;"></p>
+    </div>
+</div>
+
+<script>
+    const form = document.getElementById('lead-form');
+    const btn = document.getElementById('btn-submit');
+    const responseBox = document.getElementById('response-box');
+    const aiText = document.getElementById('ai-text');
+
+    form.addEventListener('submit', async (e) => {
+        e.preventDefault();
+        btn.textContent = "Procesando con IA...";
+        btn.disabled = true;
+
+        const nombre = document.getElementById('nombre').value;
+        const mensaje = document.getElementById('mensaje').value;
+
+        try {
+            const res = await fetch('http://127.0.0.1:8000/procesar-lead', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ cliente_nombre: nombre, mensaje: mensaje })
+            });
+
+            const data = await res.json();
+            if(data.status === "success") {
+                aiText.textContent = data.respuesta_generada;
+                responseBox.style.display = "block";
+            } else {
+                alert("Hubo un error al procesar la solicitud.");
+            }
+        } catch (error) {
+            console.error("Error:", error);
+            alert("No se pudo conectar con el servidor local.");
+        } finally {
+            btn.textContent = "Enviar Consulta";
+            btn.disabled = false;
+        }
+    });
+</script>
+
+</body>
+</html>
