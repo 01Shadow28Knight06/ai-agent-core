@@ -50,7 +50,8 @@
         const mensaje = document.getElementById('mensaje').value;
 
         try {
-            const res = await fetch('http://127.0.0.1:8000/procesar-lead', {
+            // APUNTAMOS DIRECTAMENTE A TU SERVIDOR EN RENDER
+            const res = await fetch('https://ai-agent-core-imkc.onrender.com/procesar-lead', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ cliente_nombre: nombre, mensaje: mensaje })
@@ -65,7 +66,7 @@
             }
         } catch (error) {
             console.error("Error:", error);
-            alert("No se pudo conectar con el servidor local.");
+            alert("No se pudo conectar con el servidor en la nube.");
         } finally {
             btn.textContent = "Enviar Consulta";
             btn.disabled = false;

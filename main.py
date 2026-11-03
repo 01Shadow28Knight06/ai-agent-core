@@ -1,3 +1,5 @@
+TELEGRAM_BOT_TOKEN = os.getenv("TELEGRAM_BOT_TOKEN", "9064545567:AAGg0FXDYlbxwG3Y5a6zCaflvzvEquUv2rQ")
+TELEGRAM_CHAT_ID = os.getenv("TELEGRAM_CHAT_ID", "7256706573")
 import os
 from fastapi import FastAPI, Depends, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
@@ -6,6 +8,7 @@ from google import genai
 from google.genai import types
 from dotenv import load_dotenv
 from sqlalchemy.orm import Session
+import httpx
 
 import models
 from database import engine, get_db
@@ -30,7 +33,26 @@ client = genai.Client()
 class LeadMessage(BaseModel):
     cliente_nombre: str
     mensaje: str
-
+async def enviar_alerta_telegram(nombre: str, mensaje: str, respuesta: str):
+    if TELEGRAM_BOT_TOKEN == "TU_TOKEN_AQUI":
+        return # Si no está configurado, no hace nada para evitar errores
+    
+    texto = (
+        f"🚨 **¡Nuevo Lead Calificado!** 🚨\n\n"
+        f"👤 **Cliente:** {nombre}\n"
+        f"💬 **Mensaje:** {mensaje}\n"
+        f"🤖 **IA Respondió:** {respuesta}"
+    )
+    
+    url = f"https://api.telegram.org/bot{TELEGRAM_BOT_TOKEN}/sendMessage"
+    payload = {
+        "chat_id": TELEGRAM_CHAT_ID,
+        "text": texto,
+        "parse_mode": "Markdown"
+    }
+    
+    async with httpx.AsyncClient() as client:
+        await client.post(url, json=payload)
 @app.get("/")
 def read_root():
     return {"status": "online", "message": "Motor con Gemini, SQLite, Webhook y CRM activo."}
@@ -65,7 +87,8 @@ async def procesar_lead(data: LeadMessage, db: Session = Depends(get_db)):
         db.add(nuevo_lead)
         db.commit()
         db.refresh(nuevo_lead)
-
+        # Disparamos la alerta a Telegram en segundo plano
+        await enviar_alerta_telegram(data.cliente_nombre, data.mensaje, respuesta_ia)
         return {
             "status": "success",
             "lead_id": nuevo_lead.id,
